@@ -1,3 +1,14 @@
+# import os
+# import glob
+
+# path = './repos/iudx-voc/'
+# contents = []
+# for root, directories, files in os.walk(path):
+#     for file in files:
+#         filepath = os.path.join(root, file)
+#         if filepath.endswith('.jsonld'):
+#             contents.append((file))
+                
 import os,json
 
 path_to_json = './repos/iudx-voc/'
@@ -64,13 +75,25 @@ for root, directories, files in os.walk(path_to_json):
         filepath = os.path.join(root, file)
         if filepath.endswith('.jsonld'):
             with open(filepath) as json_file:
-                data = json.load(json_file)
-                if '@graph' in data:
-                    graphs.append(data['@graph'])
-                    id.append(data['@graph'][0]['@id'])
+                    data = json.load(json_file)
+                    if '@graph'in data.keys():
+                    #    print(data['@graph'])
+                       for item in data['@graph']:
+                            if "rdfs:Class" in item["@type"]:
+                                print('Class Name ' + item["@id"])
+                                g.add_vertex(item["@id"])
+                            elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "TimeProperty" in item["@type"]:
+                                g.add_vertex(item["@id"])
+                                print('Property Name '+ item["@id"])
+                            elif "iudx:Relationship" in item["@type"]:
+                                print('Relationship ' + item["@id"])
+                # if '@graph' in data:
+                #     graphs.append(data['@graph'])
+                #     id.append(data['@graph'][0]['@id'])
+                #     print(graphs)
                     # print(graphs[0][0]['@type'])
-                for item in graphs:
-                    print(item)
+                # for item in grg.add_vertex(item["@id"])aphs:
+                #     print(graphs)
                     # if "rdfs:Class" or "owl:Class" in item[0]['@type']:
                     #     print(item[0]['@id'])  
                     # print(item[0]['@type'])
