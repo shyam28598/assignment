@@ -85,7 +85,7 @@ for root, directories, files in os.walk(path_to_json):
                             elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "TimeProperty" in item["@type"]:
                                 g.add_vertex(item["@id"])
                                 print('Property Name '+ item["@id"])
-                            elif "iudx:Relationship" in item["@type"]:
+                            elif 'iudx:Relationship' in item["@type"]:
                                 print('Relationship ' + item["@id"])
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
