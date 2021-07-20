@@ -69,6 +69,8 @@ class Graph:
 classes=['owl:Class','rdfs:Class']
 properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty"] 
 relations=['iudx:Relationship']
+vertex_items=[]
+relations_items=[]
 graphs = []
 g =Graph()
 for root, directories, files in os.walk(path_to_json):
@@ -82,14 +84,16 @@ for root, directories, files in os.walk(path_to_json):
                     for item in data['@graph']:
                         if (any(ele in classes for ele in item['@type'])):
                             print('Class Name ' + item["@id"])
+                            vertex_items.append(item["@id"])
                             g.add_vertex(item['@id'])
                         elif (any(ele in properties for ele in item['@type'])):
                             g.add_vertex(item['@id'])
+                            vertex_items.append(item["@id"])
                             print('Property Name ' + item["@id"])
                         elif (any(ele in relations for ele in item['@type'])):
                             print("Relationship " + item['@id'])
-                            # print(g.get_all_vertices())
-                        #    print(g.get_vertex('iudx:Camera'))
+                            print(g.get_all_vertices())
+                            print(g.get_vertex('iudx:Camera'))
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
                 #     id.append(data['@graph'][0]['@id'])
