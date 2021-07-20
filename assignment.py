@@ -14,8 +14,9 @@ import os,json
 path_to_json = './repos/iudx-voc/'
 
 class vertex:
-    def __init__(self, node) -> None:
+    def __init__(self, node,vertice_type) -> None:
         self.id = node
+        self.node_type = vertice_type
         self.adjacent= {}
 
     def __str__(self) -> str:
@@ -33,18 +34,23 @@ class vertex:
     def get_id(self):
         return(self.id)
 
+    def get_type(self):
+        return(self.node_type)
+
 class Graph:
     def __init__(self) -> None:
         self.vertices = {}
+        self.nodetype = {}
         self.num_of_vertices = 0
 
     def __iter__(self) ->None:
         return(iter(self.vertices.values()))
 
-    def add_vertex(self,node):
+    def add_vertex(self,node,node_type):
         self.num_of_vertices = self.num_of_vertices + 1
-        new_vertex = vertex(node)
+        new_vertex = vertex(node,node_type)
         self.vertices[node] =new_vertex
+        self.nodetype[node_type]=new_vertex[vertice_type]
         return new_vertex
 
     def add_edge(self,vertex_from,vertex_to,relationship):
@@ -69,10 +75,9 @@ class Graph:
 classes=['owl:Class','rdfs:Class']
 properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty"] 
 relations=['iudx:Relationship']
-vertex_items=[]
+class_items=[]
+properties_items=[]
 relations_items=[]
-i=0
-j=0
 g =Graph()
 for root, directories, files in os.walk(path_to_json):
     for file in files:
@@ -85,22 +90,17 @@ for root, directories, files in os.walk(path_to_json):
                     for item in data['@graph']:
                         if (any(ele in classes for ele in item['@type'])):
                             # print('Class Name ' + item["@id"])
-                            i=i+1
-                            vertex_items.append(item["@id"])
+                            class_items.append(item["@id"])
                             g.add_vertex(item['@id'])
                         elif (any(ele in properties for ele in item['@type'])):
-                            i=i+1
                             g.add_vertex(item['@id'])
-                            vertex_items.append(item["@id"])
+                            properties_items.append(item["@id"])
                             # print('Property Name ' + item["@id"])
                         elif (any(ele in relations for ele in item['@type'])):
                             # print("Relationship " + item['@id'])
-                            j=j+1
-                            relations_items.append(item['@id'])
-                            print(g.add_edge(str(vertex_items[i]),str(item['iudx:domainIncludes'][0]),str(relations_items[j])))
-
-                        
-                            # print(g.get_all_vertices())
+                            # print(g.add_edge(str(class_items[i]),str(properties_items[j]),str(relations_items[k])))
+                            print(g.get_all_vertices())
+                            
                             # print(g.get_vertex('iudx:Camera'))
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
