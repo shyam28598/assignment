@@ -14,7 +14,7 @@ import os,json
 path_to_json = './repos/iudx-voc/'
 
 class vertex:
-    def __init__(self, node) -> None:
+    def __init__(self, node=[]) -> None:
         self.id = node
         self.adjacent= {}
 
@@ -68,7 +68,7 @@ class Graph:
 
 
 graphs = []
-id= []
+relations = []
 g =Graph()
 for root, directories, files in os.walk(path_to_json):
     for file in files:
@@ -79,14 +79,16 @@ for root, directories, files in os.walk(path_to_json):
                     if '@graph'in data.keys():
                     #    print(data['@graph'])
                        for item in data['@graph']:
-                            if "rdfs:Class" in item["@type"]:
-                                print('Class Name ' + item["@id"])
-                                g.add_vertex(item['@id'])
-                            elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "iudx:TimeProperty" in item["@type"]:
-                                g.add_vertex(item['@id'])
-                                print('Property Name '+ item["@id"])
-                            elif "iudx:Relationship" in item["@type"]:
-                                print("Relationship"+item['@id'])
+                           if "rdfs:Class" in item["@type"]:
+                            #    print('Class Name ' + item["@id"])
+                               g.add_vertex(item['@id'])
+                           elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "iudx:TimeProperty" in item["@type"]:
+                               g.add_vertex(item['@id'])
+                            #    print('Property Name ' + item["@id"])
+                           elif "iudx:Relationship" in item["@type"]:
+                               print("Relationship " + item['@id'])
+                           print(g.get_all_vertices())
+                        #    print(g.get_vertex('iudx:Camera'))
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
                 #     id.append(data['@graph'][0]['@id'])
