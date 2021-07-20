@@ -40,7 +40,6 @@ class vertex:
 class Graph:
     def __init__(self) -> None:
         self.vertices = {}
-        self.nodetype = {}
         self.num_of_vertices = 0
 
     def __iter__(self) ->None:
@@ -50,7 +49,6 @@ class Graph:
         self.num_of_vertices = self.num_of_vertices + 1
         new_vertex = vertex(node,node_type)
         self.vertices[node] =new_vertex
-        self.nodetype[node_type]=new_vertex[vertice_type]
         return new_vertex
 
     def add_edge(self,vertex_from,vertex_to,relationship):
