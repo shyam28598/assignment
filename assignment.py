@@ -71,7 +71,8 @@ properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredP
 relations=['iudx:Relationship']
 vertex_items=[]
 relations_items=[]
-graphs = []
+i=0
+j=0
 g =Graph()
 for root, directories, files in os.walk(path_to_json):
     for file in files:
@@ -83,17 +84,24 @@ for root, directories, files in os.walk(path_to_json):
                     # print(data['@graph'])
                     for item in data['@graph']:
                         if (any(ele in classes for ele in item['@type'])):
-                            print('Class Name ' + item["@id"])
+                            # print('Class Name ' + item["@id"])
+                            i=i+1
                             vertex_items.append(item["@id"])
                             g.add_vertex(item['@id'])
                         elif (any(ele in properties for ele in item['@type'])):
+                            i=i+1
                             g.add_vertex(item['@id'])
                             vertex_items.append(item["@id"])
-                            print('Property Name ' + item["@id"])
+                            # print('Property Name ' + item["@id"])
                         elif (any(ele in relations for ele in item['@type'])):
-                            print("Relationship " + item['@id'])
-                            print(g.get_all_vertices())
-                            print(g.get_vertex('iudx:Camera'))
+                            # print("Relationship " + item['@id'])
+                            j=j+1
+                            relations_items.append(item['@id'])
+                            print(g.add_edge(str(vertex_items[i]),str(item['iudx:domainIncludes'][0]),str(relations_items[j])))
+
+                        
+                            # print(g.get_all_vertices())
+                            # print(g.get_vertex('iudx:Camera'))
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
                 #     id.append(data['@graph'][0]['@id'])
