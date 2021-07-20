@@ -14,7 +14,7 @@ import os,json
 path_to_json = './repos/iudx-voc/'
 
 class vertex:
-    def __init__(self, node=[]) -> None:
+    def __init__(self, node) -> None:
         self.id = node
         self.adjacent= {}
 
@@ -66,28 +66,29 @@ class Graph:
     def get_all_vertices(self):
         return(self.vertices.keys())
 
-
+classes=['owl:Class','rdfs:Class']
+properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty"] 
+relations=['iudx:Relationship']
 graphs = []
-relations = []
 g =Graph()
 for root, directories, files in os.walk(path_to_json):
     for file in files:
         filepath = os.path.join(root, file)
         if filepath.endswith('.jsonld'):
             with open(filepath) as json_file:
-                    data = json.load(json_file)
-                    if '@graph'in data.keys():
-                    #    print(data['@graph'])
-                       for item in data['@graph']:
-                           if "rdfs:Class" in item["@type"]:
-                            #    print('Class Name ' + item["@id"])
-                               g.add_vertex(item['@id'])
-                           elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "iudx:TimeProperty" in item["@type"]:
-                               g.add_vertex(item['@id'])
-                            #    print('Property Name ' + item["@id"])
-                           elif "iudx:Relationship" in item["@type"]:
-                               print("Relationship " + item['@id'])
-                           print(g.get_all_vertices())
+                data = json.load(json_file)
+                if '@graph'in data.keys():
+                    # print(data['@graph'])
+                    for item in data['@graph']:
+                        if (any(ele in classes for ele in item['@type'])):
+                            print('Class Name ' + item["@id"])
+                            g.add_vertex(item['@id'])
+                        elif (any(ele in properties for ele in item['@type'])):
+                            g.add_vertex(item['@id'])
+                            print('Property Name ' + item["@id"])
+                        elif (any(ele in relations for ele in item['@type'])):
+                            print("Relationship " + item['@id'])
+                            # print(g.get_all_vertices())
                         #    print(g.get_vertex('iudx:Camera'))
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
