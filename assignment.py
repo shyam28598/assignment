@@ -81,12 +81,12 @@ for root, directories, files in os.walk(path_to_json):
                        for item in data['@graph']:
                             if "rdfs:Class" in item["@type"]:
                                 print('Class Name ' + item["@id"])
-                                g.add_vertex(item["@id"])
-                            elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "TimeProperty" in item["@type"]:
-                                g.add_vertex(item["@id"])
+                                g.add_vertex(item['@id'])
+                            elif "iudx:TextProperty" or "iudx:QuantitativeProperty" or "iudx:StructuredProperty" or "iudx:GeoProperty" or "iudx:TimeProperty" in item["@type"]:
+                                g.add_vertex(item['@id'])
                                 print('Property Name '+ item["@id"])
-                            elif 'iudx:Relationship' in item["@type"]:
-                                print('Relationship ' + item["@id"])
+                            elif "iudx:Relationship" in item["@type"]:
+                                print("Relationship"+item['@id'])
                 # if '@graph' in data:
                 #     graphs.append(data['@graph'])
                 #     id.append(data['@graph'][0]['@id'])
