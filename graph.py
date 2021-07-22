@@ -132,8 +132,6 @@ for n in json_ld_graph:
         if (any(ele in classes for ele in n["@type"])):
             tp="Class"
             g.add_vertex(n["@id"],tp)
-            if "rdfs:subClassOf" in n:
-                g.add_edge(n["@id"],"subClassOf",n["rdfs:subClassOf"]["@id"])
                 
 
         if (any(ele in properties for ele in n["@type"])):
