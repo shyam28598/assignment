@@ -80,20 +80,20 @@ class Graph:
     def __iter__(self) ->None:
         return(iter(self.vertices.values()))
 
-    def add_vertex(self,node):
+    def add_vertex(self,node,tp,domainOf):
         self.num_of_vertices = self.num_of_vertices + 1
         new_vertex = vertex(node)
         self.vertices[node] =new_vertex
         return new_vertex
 
-    def add_edge(self,vertex_from,vertex_to,cost = 0):
+    def add_edge(self,vertex_from,vertex_to,relationship):
         if vertex_from not in self.vertices:
-            self.add_vertex(vertex_from)
+            self.add_vertex(vertex_from,tp,domainOf)
         if vertex_to not in self.vertices:
-            self.add_vertex(vertex_to) 
+            self.add_vertex(vertex_to,tp,domainOf) 
         
-        self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to],cost)
-        self.vertices[vertex_to].add_neighbour(self.vertices[vertex_from],cost)
+        self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to],relationship)
+        self.vertices[vertex_to].add_neighbour(self.vertices[vertex_from],relationship)
 
 
     def get_vertex(self,search):
@@ -128,20 +128,24 @@ properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredP
 for n in json_ld_graph:
     if (any(ele in classes for ele in n["@type"])):
         tp = "Class"
-        print(g.add_vertex(n["@id"],tp,domainOf))
+        # print(g.add_vertex(n["@id"],tp,domainOf))
         if "iudx:domainIncludes" in n:
             for dIncl in n["iudx:domainIncludes"]:
                 domainOf= dIncl
     elif (any(ele in properties for ele in n["@type"])):
         tp = "Property"
-        # g.add_vertex(n["@id"],tp)
+        domainOf = "P"
+        g.add_vertex(n["@id"],tp,domainOf)
         continue   
-    if (any(ele in properties for ele in n)):
-        for dIncl in n["iudx:domainIncludes"]:
-            g.add_edge(n["@id"], dIncl, "domainIncludes")
-        for rIncl in n["iudx:RangeIncludes"]:
-            g.add_edge(n["@id"], rIncl, "rangeIncludes")
-    elif (any(ele in classes for ele in n)):
-        g.add_edge(n["@id"], n["subClassOf"], "subClassOf")
-    # print(g.get_all_vertices())
-    # print(g.get_vertex("iudx:geoCovers"))
+    if (any(ele in properties for ele in n["@type"])):
+        if "iudx:domainIncludes" in n:
+            for dIncl in n["iudx:domainIncludes"]:
+                g.add_edge(n["@id"], dIncl, "domainIncludes")
+        if "iudx:rangeIncludes" in n:
+            for rIncl in n["iudx:RangeIncludes"]:
+                g.add_edge(n["@id"], rIncl, "rangeIncludes")
+    elif (any(ele in classes for ele in n["@type"])):
+        if "rdfs:subClassOf" in n:
+            g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
+# print(g.get_all_vertices())
+print(g.get_vertex("iudx:geoCovers"))
