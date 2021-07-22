@@ -51,7 +51,7 @@ class Vertex:
         self.adjacent= {}
 
     def __str__(self) -> str:
-        return(str(self.id)) + ' is a subClass of : -->' + str([x.id for x in self.adjacent])
+        return(str(self.id)) + ' is a subClass/property of : -->' + str([x.id for x in self.adjacent])
 
     def add_neighbour(self,neighbour,relationship):
         self.adjacent[neighbour] = relationship
@@ -81,7 +81,7 @@ class Graph:
     def __iter__(self) ->None:
         return(iter(self.vertices.values()))
 
-    def add_vertex(self,node,tp,domainOf):
+    def add_vertex(self,node,tp):
         self.num_of_vertices = self.num_of_vertices + 1
         new_vertex = Vertex(node,tp)
         self.vertices[node] =new_vertex
@@ -89,9 +89,9 @@ class Graph:
 
     def add_edge(self,vertex_from,vertex_to,relationship):
         if vertex_from not in self.vertices:
-            self.add_vertex(vertex_from,tp,domainOf)
+            self.add_vertex(vertex_from,tp)
         if vertex_to not in self.vertices:
-            self.add_vertex(vertex_to,tp,domainOf) 
+            self.add_vertex(vertex_to,tp) 
         
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to],relationship)
         self.vertices[vertex_to].add_neighbour(self.vertices[vertex_from],relationship)
@@ -125,15 +125,12 @@ class Graph:
 '''
 g = Graph()
 classes=['owl:Class','rdfs:Class']
-class_ls=[]
-properties_ls=[]
-properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty"] 
+properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty","rdf:Property"] 
 required=["iudx:domainIncludes"]
 for n in json_ld_graph:
         # Making vertices of all classes  
         if (any(ele in classes for ele in n["@type"])):
             tp="Class"
-            class_ls.append(n)
             g.add_vertex(n["@id"],tp)
 
         if (any(ele in properties for ele in n["@type"])):
@@ -143,6 +140,13 @@ for n in json_ld_graph:
                 for i in n["iudx:domainIncludes"]:
                     g.add_edge(n["@id"],i["@id"],"domainIncludes")
                     g.add_edge(i["@id"],n["@id"],"domainOf")
+for v in g:
+        for w in v.get_connections():
+            vid = v.get_id()
+            vtype=v.get_type()
+            wtype=w.get_type()
+            wid = w.get_id()
+            print ( vid,vtype,v.get_weight(w), wid,wtype)
 
 # print(g.get_all_vertices())
-print(g.get_vertex("iudx:iudxResourceAPIs"))
+# print(g.get_vertex("iudx:LineString"))
