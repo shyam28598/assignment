@@ -132,6 +132,9 @@ for n in json_ld_graph:
         if (any(ele in classes for ele in n["@type"])):
             tp="Class"
             g.add_vertex(n["@id"],tp)
+            if "rdfs:subClassOf" in n:
+                g.add_edge(n["@id"],"subClassOf",n["rdfs:subClassOf"]["@id"])
+                
 
         if (any(ele in properties for ele in n["@type"])):
             tp = "Property"
@@ -146,10 +149,10 @@ for v in g:
             vtype=v.get_type()
             wtype=v.get_type()
             wid = w.get_id()
-            # print ( vid,vtype,v.get_weight(w), wid)
+            print ( vid,vtype,v.get_weight(w), wid)
 
 
-for v in g:
-    print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
+# for v in g:
+    # print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
 # print(g.get_all_vertices())
-# print(g.get_vertex("iudx:LineString"))
+# print(g.get_vertex("iudx:location"))
