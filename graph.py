@@ -126,20 +126,22 @@ g = Graph()
 classes=['owl:Class','rdfs:Class']
 properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty"] 
 for n in json_ld_graph:
-    if (any(ele in classes for ele in n)):
+    if (any(ele in classes for ele in n["@type"])):
         tp = "Class"
-        print(g.add_vertex(n["@id"], tp,domainOf))
-        for dIncl in n["iudx:domainInlcudes"]:
-            domainOf= dIncl
-    elif (any(ele in properties for ele in n)):
+        print(g.add_vertex(n["@id"],tp,domainOf))
+        if "iudx:domainIncludes" in n:
+            for dIncl in n["iudx:domainIncludes"]:
+                domainOf= dIncl
+    elif (any(ele in properties for ele in n["@type"])):
         tp = "Property"
-        g.add_vertex(n["@id"], tp)
+        # g.add_vertex(n["@id"],tp)
         continue   
     if (any(ele in properties for ele in n)):
-        for dIncl in n["iudx:domainInlcudes"]:
+        for dIncl in n["iudx:domainIncludes"]:
             g.add_edge(n["@id"], dIncl, "domainIncludes")
         for rIncl in n["iudx:RangeIncludes"]:
             g.add_edge(n["@id"], rIncl, "rangeIncludes")
     elif (any(ele in classes for ele in n)):
         g.add_edge(n["@id"], n["subClassOf"], "subClassOf")
-    print(g.get_all_vertices())
+    # print(g.get_all_vertices())
+    # print(g.get_vertex("iudx:geoCovers"))
