@@ -50,7 +50,7 @@ class vertex:
         self.adjacent= {}
 
     def __str__(self) -> str:
-        return(str(self.id)) + '--> adjacent nodes are : ' + str([x.id for x in self.adjacent])
+        return(str(self.id)) + ' is a subClass of : -->' + str([x.id for x in self.adjacent])
 
     def add_neighbour(self,neighbour,relationship):
         self.adjacent[neighbour] = relationship
@@ -128,7 +128,7 @@ properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredP
 for n in json_ld_graph:
     if (any(ele in classes for ele in n["@type"])):
         tp = "Class"
-        # print(g.add_vertex(n["@id"],tp,domainOf))
+        g.add_vertex(n["@id"],tp,domainOf)
         if "iudx:domainIncludes" in n:
             for dIncl in n["iudx:domainIncludes"]:
                 domainOf= dIncl
@@ -148,4 +148,4 @@ for n in json_ld_graph:
         if "rdfs:subClassOf" in n:
             g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
 # print(g.get_all_vertices())
-print(g.get_vertex("iudx:geoCovers"))
+print(g.get_vertex('iudx:TimeSeriesAggregation'))
