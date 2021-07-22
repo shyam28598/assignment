@@ -44,9 +44,10 @@ for subdir, dirs, files in os.walk(path_to_json):
 #1. Just copy paste the class here
 Output: Class Vertex
 '''
-class vertex:
-    def __init__(self, node) -> None:
+class Vertex:
+    def __init__(self, node,vertice_type) -> None:
         self.id = node
+        self.node_type = vertice_type
         self.adjacent= {}
 
     def __str__(self) -> str:
@@ -82,7 +83,7 @@ class Graph:
 
     def add_vertex(self,node,tp,domainOf):
         self.num_of_vertices = self.num_of_vertices + 1
-        new_vertex = vertex(node)
+        new_vertex = Vertex(node,tp)
         self.vertices[node] =new_vertex
         return new_vertex
 
@@ -124,28 +125,24 @@ class Graph:
 '''
 g = Graph()
 classes=['owl:Class','rdfs:Class']
+class_ls=[]
+properties_ls=[]
 properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty"] 
+required=["iudx:domainIncludes"]
 for n in json_ld_graph:
-    if (any(ele in classes for ele in n["@type"])):
-        tp = "Class"
-        g.add_vertex(n["@id"],tp,domainOf)
-        if "iudx:domainIncludes" in n:
-            for dIncl in n["iudx:domainIncludes"]:
-                domainOf= dIncl
-    elif (any(ele in properties for ele in n["@type"])):
-        tp = "Property"
-        domainOf = "P"
-        g.add_vertex(n["@id"],tp,domainOf)
-        continue   
-    if (any(ele in properties for ele in n["@type"])):
-        if "iudx:domainIncludes" in n:
-            for dIncl in n["iudx:domainIncludes"]:
-                g.add_edge(n["@id"], dIncl, "domainIncludes")
-        if "iudx:rangeIncludes" in n:
-            for rIncl in n["iudx:RangeIncludes"]:
-                g.add_edge(n["@id"], rIncl, "rangeIncludes")
-    elif (any(ele in classes for ele in n["@type"])):
-        if "rdfs:subClassOf" in n:
-            g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
+        # Making vertices of all classes  
+        if (any(ele in classes for ele in n["@type"])):
+            tp="Class"
+            class_ls.append(n)
+            g.add_vertex(n["@id"],tp)
+
+        if (any(ele in properties for ele in n["@type"])):
+            tp = "Property"
+            g.add_vertex(n["@id"],tp)
+            if "iudx:domainIncludes" in n :
+                for i in n["iudx:domainIncludes"]:
+                    g.add_edge(n["@id"],i["@id"],"domainIncludes")
+                    g.add_edge(i["@id"],n["@id"],"domainOf")
+
 # print(g.get_all_vertices())
-print(g.get_vertex('iudx:TimeSeriesAggregation'))
+print(g.get_vertex("iudx:iudxResourceAPIs"))
