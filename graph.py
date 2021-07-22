@@ -21,16 +21,19 @@ Output: List json_ld_graph
 '''
 path_to_json='./repos/iudx-voc/'
 json_ld_graph=[]
-new=[]
-for root, directories, files in os.walk(path_to_json):
-    for file in files:
-        filepath = os.path.join(root, file)
-        if filepath.endswith('.jsonld'):
-            with open(filepath) as json_file:
-                data = json.load(json_file)
-                if '@graph'in data.keys():
-                    json_ld_graph=list((data["@graph"]))
 
+
+for subdir, dirs, files in os.walk(path_to_json):
+    for file in files:
+        #print os.path.join(subdir, file)
+        filepath = subdir + os.sep + file
+
+        if filepath.endswith(".jsonld"):
+            # print (filepath)
+            with open(filepath,"r+") as input_file:
+                data=json.load(input_file)
+                if "@graph" in data:
+                    json_ld_graph.append((data["@graph"][0])) 
                     
 
                 
@@ -125,15 +128,17 @@ properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredP
 for n in json_ld_graph:
     if (any(ele in classes for ele in n)):
         tp = "Class"
-        g.add_vertex(n["@id"], tp)
+        print(g.add_vertex(n["@id"], tp,domainOf))
+        for dIncl in n["iudx:domainInlcudes"]:
+            domainOf= dIncl
     elif (any(ele in properties for ele in n)):
         tp = "Property"
         g.add_vertex(n["@id"], tp)
         continue   
     if (any(ele in properties for ele in n)):
-        for dIncl in data["iudx:domainInlcudes"]:
+        for dIncl in n["iudx:domainInlcudes"]:
             g.add_edge(n["@id"], dIncl, "domainIncludes")
-        for rIncl in data["iudx:RangeIncludes"]:
+        for rIncl in n["iudx:RangeIncludes"]:
             g.add_edge(n["@id"], rIncl, "rangeIncludes")
     elif (any(ele in classes for ele in n)):
         g.add_edge(n["@id"], n["subClassOf"], "subClassOf")
