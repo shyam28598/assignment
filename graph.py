@@ -51,7 +51,7 @@ class Vertex:
         self.adjacent= {}
 
     def __str__(self) -> str:
-        return(str(self.id)) + ' is a subClass/property of : -->' + str([x.id for x in self.adjacent])
+        return(str(self.id)) + ' domainIncludes : -->' + str([x.id for x in self.adjacent])
 
     def add_neighbour(self,neighbour,relationship):
         self.adjacent[neighbour] = relationship
@@ -138,15 +138,18 @@ for n in json_ld_graph:
             g.add_vertex(n["@id"],tp)
             if "iudx:domainIncludes" in n :
                 for i in n["iudx:domainIncludes"]:
-                    g.add_edge(n["@id"],i["@id"],"domainIncludes")
-                    g.add_edge(i["@id"],n["@id"],"domainOf")
+                    g.add_edge(i["@id"],n["@id"],"domainIncludes")
+                    g.add_edge(n["@id"],i["@id"],"domainOf")
 for v in g:
         for w in v.get_connections():
             vid = v.get_id()
             vtype=v.get_type()
-            wtype=w.get_type()
+            wtype=v.get_type()
             wid = w.get_id()
-            print ( vid,vtype,v.get_weight(w), wid,wtype)
+            # print ( vid,vtype,v.get_weight(w), wid)
 
+
+for v in g:
+    print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
 # print(g.get_all_vertices())
 # print(g.get_vertex("iudx:LineString"))
