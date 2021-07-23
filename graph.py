@@ -51,7 +51,7 @@ class Vertex:
         self.adjacent= {}
 
     def __str__(self) -> str:
-        return(str(self.id)) + ' domainIncludes : -->' + str([x.id for x in self.adjacent])
+        return(str(self.id)) + ' adjacent nodes are: -->' + str([x.id for x in self.adjacent])
 
     def add_neighbour(self,neighbour,relationship):
         self.adjacent[neighbour] = relationship
@@ -68,6 +68,12 @@ class Vertex:
     def get_type(self):
         return(self.node_type)
 
+    def get_properties(self):
+        for k in self.adjacent.keys():
+            if (self.adjacent[k] == "subClassOf"):
+                print(k)
+
+            
 # c. Class Graph 
 '''  Instructions
 #1. Just copy paste the class here
@@ -132,6 +138,8 @@ for n in json_ld_graph:
         if (any(ele in classes for ele in n["@type"])):
             tp="Class"
             g.add_vertex(n["@id"],tp)
+            if "rdfs:subClassOf" in n:
+                g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
                 
 
         if (any(ele in properties for ele in n["@type"])):
@@ -147,10 +155,12 @@ for v in g:
             vtype=v.get_type()
             wtype=v.get_type()
             wid = w.get_id()
-            print ( vid,vtype,v.get_weight(w), wid)
-
-
+            # print ( vid,vtype,v.get_weight(w), wid)
+for v in g:
+    v.get_properties()
 # for v in g:
     # print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
 # print(g.get_all_vertices())
-# print(g.get_vertex("iudx:location"))
+# print(g.get_vertex("iudx:Resource"))
+
+# iudx:Resource domainIncludes : -->['iudx:IUDXEntity']
