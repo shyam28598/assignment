@@ -74,9 +74,10 @@ class Vertex:
         for k in self.adjacent.keys():
             if (self.adjacent[k] == "subClassOf"):
                 print(k)
-    def print_properties(self):
+    def get_properties(self):
         for k in self.adjacent.keys():
-            print(k)
+            if k.node_type=="Property":
+                print(k)
 
 
             
@@ -163,7 +164,6 @@ for v in g:
             wid = w.get_id()
             # print ( vid,vtype,v.get_weight(w), wid)
 for v in g:
-    if v.get_type()=="Class":
         v.get_properties()
 # for v in g:
     # print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
