@@ -9,6 +9,8 @@
 # imports
 import os
 import json
+import sys
+sys.setrecursionlimit(5000)
 
 # a. Big graph 
 '''  Instructions
@@ -51,7 +53,7 @@ class Vertex:
         self.adjacent= {}
 
     def __str__(self) -> str:
-        return(str(self.id)) + ' adjacent nodes are: -->' + str([x.id for x in self.adjacent])
+        return(str(self.id)) + ' adjacent nodes are: -->' + str([x.id for x in self.adjacent]) 
 
     def add_neighbour(self,neighbour,relationship):
         self.adjacent[neighbour] = relationship
@@ -68,10 +70,14 @@ class Vertex:
     def get_type(self):
         return(self.node_type)
 
-    def get_properties(self):
+    def get_subclasses(self):
         for k in self.adjacent.keys():
             if (self.adjacent[k] == "subClassOf"):
                 print(k)
+    def print_properties(self):
+        for k in self.adjacent.keys():
+            print(k)
+
 
             
 # c. Class Graph 
@@ -157,7 +163,8 @@ for v in g:
             wid = w.get_id()
             # print ( vid,vtype,v.get_weight(w), wid)
 for v in g:
-    v.get_properties()
+    if v.get_type()=="Class":
+        v.get_properties()
 # for v in g:
     # print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
 # print(g.get_all_vertices())
