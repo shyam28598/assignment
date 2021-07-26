@@ -9,10 +9,6 @@
 # imports
 import os
 import json
-from platform import node
-import sys
-from unittest import result
-sys.setrecursionlimit(5000)
 
 # a. Big graph 
 '''  Instructions
@@ -53,9 +49,11 @@ class Vertex:
         self.id = node
         self.node_type = vertice_type
         self.adjacent= {}
+       
 
     def __str__(self) -> str:
         return(str(self.id)) + ' adjacent nodes are: -->' + str([x.id for x in self.adjacent])
+
 
     def add_neighbour(self,neighbour,relationship):
         self.adjacent[neighbour] = relationship
@@ -72,21 +70,13 @@ class Vertex:
     def get_type(self):
         return(self.node_type)
 
-    def get_subclasses(self):
+    def get_subclasses(self,v):
         for key,value in self.adjacent.items():
-            if (value == "subClassOf"):
-                print(key)    
-            elif v.get_properties()!=None:
-                print(v.get_properties())
-
-
-
-    
-    def get_properties(self):
-        for k in self.adjacent.keys():
-            if k.node_type=="Property":
-                print(k)
-
+            if value=="domainOf":
+                print(g.get_vertex(key))
+            elif value=="subClassOf":
+                print(value)
+                self.get_subclasses(g.get_vertex(key))
 
             
 # c. Class Graph 
@@ -98,6 +88,7 @@ class Graph:
     def __init__(self) -> None:
         self.vertices = {}
         self.num_of_vertices = 0
+        visited = set()
 
     def __iter__(self) ->None:
         return(iter(self.vertices.values()))
@@ -147,7 +138,7 @@ class Graph:
 g = Graph()
 classes=['owl:Class','rdfs:Class']
 properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty","rdf:Property"] 
-required=["iudx:domainIncludes"]
+relation=["iudx:Relationship"]
 for n in json_ld_graph:
         # Making vertices of all classes  
         if (any(ele in classes for ele in n["@type"])):
@@ -164,6 +155,14 @@ for n in json_ld_graph:
                 for i in n["iudx:domainIncludes"]:
                     g.add_edge(i["@id"],n["@id"],"domainIncludes")
                     g.add_edge(n["@id"],i["@id"],"domainOf")
+        
+        
+        # if (any (ele in relation for ele in n["@type"])):
+        #     tp = "Relationship"
+        #     g.add_vertex(n["@id"],tp)
+        #     g.add_edge(n["@id"],)
+
+
 for v in g:
         for w in v.get_connections():
             vid = v.get_id()
@@ -172,8 +171,7 @@ for v in g:
             wid = w.get_id()
             # print ( vid,vtype,v.get_weight(w), wid)
 for v in g:
-        # v.get_properties()
-        v.get_subclasses()
+        v.get_subclasses(v)
 # for v in g:
     # print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
 # print(g.get_all_vertices())
