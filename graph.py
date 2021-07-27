@@ -92,21 +92,16 @@ class Graph:
         self.vertices[node] =new_vertex
         return new_vertex
 
-    def add_edge(self,vertex_from,vertex_to,relationship):
-        if vertex_from not in self.vertices:
-            self.add_vertex(vertex_from,tp)
-        if vertex_to not in self.vertices:
-            self.add_vertex(vertex_to,tp) 
-        
+    def add_edge(self,vertex_from,vertex_to,relationship): 
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to],relationship)
         
     def get_subclasses(self,v):
         for key,value in self.adjacent.items():
             if value=="domainOf":
-                print(g.get_vertex(key))
+                print(key.id)
             elif value=="subClassOf":
                 print(value)
-                self.get_subclasses(g.get_vertex(key))
+                self.get_subclasses(key)
 
     def get_vertex(self,search):
         if search in self.vertices:
@@ -141,27 +136,39 @@ relation=["iudx:Relationship"]
 
 
 for n in json_ld_graph:
+    try:
         # Making vertices of all classes  
         if (any(ele in classes for ele in n["@type"])):
             tp="Class"
             g.add_vertex(n["@id"],tp)
-           
+        # Making vertices of all properties
         if (any(ele in properties for ele in n["@type"])):
             tp = "Property"
             g.add_vertex(n["@id"],tp)
-           
+    except:
+        print("Couldnt add vertex")      
 
 
 for n in json_ld_graph:
     try:
+
         if "rdfs:subClassOf" in n:
             g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
-    except:
-        print("SubclassOf Edge Error")
-    try:
-        if "iudx:domainIncludes" in n :
-            for i in n["iudx:domainIncludes"]:
-                g.add_edge(i["@id"],n["@id"],"domainIncludes")
-                g.add_edge(n["@id"],i["@id"],"domainOf")
-    except:
-        print("Domain Edge Error")
+            break
+    except os.error:
+        print("SubclassOf Edge Error"+os.error)
+        
+        
+    if "iudx:domainIncludes" in n :
+        for i in n["iudx:domainIncludes"]:
+            try:
+                g.add_edge(n["@id"],i["@id"],"domainIncludes")
+                g.add_edge(i["@id"],n["@id"],"domainOf")
+                break           
+            
+            except:
+                print("Domain Edge Error")
+                
+  
+
+    g.get_vertex("iudx:Resource")
