@@ -170,5 +170,6 @@ for n in json_ld_graph:
                 print("Domain Edge Error")
                 
   
-
-    g.get_vertex("iudx:Resource")
+    for v in g:
+        print(v)
+    # g.get_vertex("iudx:Resource")
