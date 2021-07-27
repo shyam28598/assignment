@@ -52,7 +52,7 @@ class Vertex:
        
 
     def __str__(self) -> str:
-        return(str(self.id)) + ' adjacent nodes are: -->' + str([x.id for x in self.adjacent])
+        return(str(self.id))
 
 
     def add_neighbour(self,neighbour,relationship):
@@ -96,7 +96,7 @@ class Graph:
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to],relationship)
         
     def get_subclasses(self,v):
-        for key,value in self.adjacent.items():
+        for key,value in v.adjacent.items():
             if value=="domainOf":
                 print(key.id)
             elif value=="subClassOf":
@@ -150,13 +150,12 @@ for n in json_ld_graph:
 
 
 for n in json_ld_graph:
+    
     try:
-
         if "rdfs:subClassOf" in n:
             g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
-            break
-    except os.error:
-        print("SubclassOf Edge Error"+os.error)
+    except:
+        print("SubclassOf Edge Error")
         
         
     if "iudx:domainIncludes" in n :
@@ -164,12 +163,11 @@ for n in json_ld_graph:
             try:
                 g.add_edge(n["@id"],i["@id"],"domainIncludes")
                 g.add_edge(i["@id"],n["@id"],"domainOf")
-                break           
+                          
             
             except:
                 print("Domain Edge Error")
                 
   
-    for v in g:
-        print(v)
-    # g.get_vertex("iudx:Resource")
+    n = g.get_vertex("iudx:Resource")
+    g.get_subclasses(n)
