@@ -52,7 +52,7 @@ class Vertex:
        
 
     def __str__(self) -> str:
-        return(str(self.id))
+        print(str(self.id))
 
 
     def add_neighbour(self,neighbour,relationship):
@@ -100,7 +100,7 @@ class Graph:
             if value=="domainOf":
                 print(key.id)
             elif value=="subClassOf":
-                print(value)
+                print(key.id)
                 self.get_subclasses(key)
 
     def get_vertex(self,search):
@@ -146,28 +146,29 @@ for n in json_ld_graph:
             tp = "Property"
             g.add_vertex(n["@id"],tp)
     except:
-        print("Couldnt add vertex")      
+        pass     
 
 
 for n in json_ld_graph:
     
-    try:
+    
         if "rdfs:subClassOf" in n:
-            g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
-    except:
-        print("SubclassOf Edge Error")
-        
-        
-    if "iudx:domainIncludes" in n :
-        for i in n["iudx:domainIncludes"]:
             try:
-                g.add_edge(n["@id"],i["@id"],"domainIncludes")
-                g.add_edge(i["@id"],n["@id"],"domainOf")
+                g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
+            except:
+                pass 
+        
+        
+        if "iudx:domainIncludes" in n :
+            for i in n["iudx:domainIncludes"]:
+                try:
+                    g.add_edge(n["@id"],i["@id"],"domainIncludes")
+                    g.add_edge(i["@id"],n["@id"],"domainOf")
                           
             
-            except:
-                print("Domain Edge Error")
+                except:
+                    pass
                 
   
-    n = g.get_vertex("iudx:Resource")
-    g.get_subclasses(n)
+n = g.get_vertex("iudx:Resource")
+g.get_subclasses(n)
