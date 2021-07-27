@@ -70,13 +70,6 @@ class Vertex:
     def get_type(self):
         return(self.node_type)
 
-    def get_subclasses(self,v):
-        for key,value in self.adjacent.items():
-            if value=="domainOf":
-                print(g.get_vertex(key))
-            elif value=="subClassOf":
-                print(value)
-                self.get_subclasses(g.get_vertex(key))
 
             
 # c. Class Graph 
@@ -88,7 +81,7 @@ class Graph:
     def __init__(self) -> None:
         self.vertices = {}
         self.num_of_vertices = 0
-        visited = set()
+        
 
     def __iter__(self) ->None:
         return(iter(self.vertices.values()))
@@ -106,8 +99,14 @@ class Graph:
             self.add_vertex(vertex_to,tp) 
         
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to],relationship)
-        self.vertices[vertex_to].add_neighbour(self.vertices[vertex_from],relationship)
-
+        
+    def get_subclasses(self,v):
+        for key,value in self.adjacent.items():
+            if value=="domainOf":
+                print(g.get_vertex(key))
+            elif value=="subClassOf":
+                print(value)
+                self.get_subclasses(g.get_vertex(key))
 
     def get_vertex(self,search):
         if search in self.vertices:
@@ -139,42 +138,30 @@ g = Graph()
 classes=['owl:Class','rdfs:Class']
 properties= ["iudx:TextProperty","iudx:QuantitativeProperty" , "iudx:StructuredProperty" , "iudx:GeoProperty" , "iudx:TimeProperty","rdf:Property"] 
 relation=["iudx:Relationship"]
+
+
 for n in json_ld_graph:
         # Making vertices of all classes  
         if (any(ele in classes for ele in n["@type"])):
             tp="Class"
             g.add_vertex(n["@id"],tp)
-            if "rdfs:subClassOf" in n:
-                g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
-                
-
+           
         if (any(ele in properties for ele in n["@type"])):
             tp = "Property"
             g.add_vertex(n["@id"],tp)
-            if "iudx:domainIncludes" in n :
-                for i in n["iudx:domainIncludes"]:
-                    g.add_edge(i["@id"],n["@id"],"domainIncludes")
-                    g.add_edge(n["@id"],i["@id"],"domainOf")
-        
-        
-        # if (any (ele in relation for ele in n["@type"])):
-        #     tp = "Relationship"
-        #     g.add_vertex(n["@id"],tp)
-        #     g.add_edge(n["@id"],)
+           
 
 
-for v in g:
-        for w in v.get_connections():
-            vid = v.get_id()
-            vtype=v.get_type()
-            wtype=v.get_type()
-            wid = w.get_id()
-            # print ( vid,vtype,v.get_weight(w), wid)
-for v in g:
-        v.get_subclasses(v)
-# for v in g:
-    # print ("g.vertices[%s,%s]=%s" %(v.get_id(),v.get_type(), g.vertices[v.get_id()]))
-# print(g.get_all_vertices())
-# print(g.get_vertex("iudx:Resource"))
-
-# iudx:Resource domainIncludes : -->['iudx:IUDXEntity']
+for n in json_ld_graph:
+    try:
+        if "rdfs:subClassOf" in n:
+            g.add_edge(n["@id"],n["rdfs:subClassOf"]["@id"],"subClassOf")
+    except:
+        print("SubclassOf Edge Error")
+    try:
+        if "iudx:domainIncludes" in n :
+            for i in n["iudx:domainIncludes"]:
+                g.add_edge(i["@id"],n["@id"],"domainIncludes")
+                g.add_edge(n["@id"],i["@id"],"domainOf")
+    except:
+        print("Domain Edge Error")
