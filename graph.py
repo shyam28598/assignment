@@ -9,7 +9,8 @@ json_ld_graph = []
 classes = ['owl:Class', 'rdfs:Class']
 properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "rdf:Property"] 
 relation = ["iudx:Relationship"]
-blank = []
+list_out = []
+error_list = []
 for subdir, dirs, files in os.walk(path_to_json):
     for file in files:
         #print os.path.join(subdir, file)
@@ -79,6 +80,9 @@ class Graph:
             elif value == "subClassOf":
                 out.append(key.jsonld)
                 self.get_class_graph(key,out)
+            elif value == "rangeOf":
+                out.append(key.jsonld)
+                self.get_class_graph(key,out)
 
     def get_vertex(self, search):
         if search in self.vertices:
@@ -110,19 +114,30 @@ for n in json_ld_graph:
         if "rdfs:subClassOf" in n:
             try:
                 g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
-            except:
-                pass 
+            except Exception as error:
+                error_list.append({"Error in subClassOf type : {0}, value: {1}".format(error.__class__.__name__,error)})
+                pass
+                
              
         if "iudx:domainIncludes" in n :
             for i in n["iudx:domainIncludes"]:
                 try:
                     g.add_edge(n["@id"], i["@id"], "domainIncludes")
                     g.add_edge(i["@id"], n["@id"], "domainOf")      
-                except:
+                except Exception as error:
+                    error_list.append({"Error in domainIncludes type : {0}, value: {1}".format(error.__class__.__name__,error)})
                     pass
                 
-
+        if "iudx:rangeIncludes" in n :
+            for i in n["iudx:rangeIncludes"]:
+                try:
+                    g.add_edge(n["@id"], i["@id"], "rangeIncludes")
+                    g.add_edge(i["@id"], n["@id"], "rangeOf")
+                except Exception as error:
+                    error_list.append({"Error in rangeIncludes type : {0}, value: {1}".format(error.__class__.__name__,error)})
+                    pass
 
 n = g.get_vertex("iudx:Resource")
-g.get_class_graph(n,blank)
-print(blank)
+g.get_class_graph(n,list_out)
+# print(list_out)
+print(error_list)
