@@ -115,7 +115,7 @@ for n in json_ld_graph:
             try:
                 g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
             except Exception as error:
-                error_list.append({"type ": "subClassOf missing" , "value" : str(error)})
+                error_list.append({"type ": "subClassOf missing" , "value" : str(error), "in": n["@id"]})
                 pass
                 
              
@@ -125,7 +125,7 @@ for n in json_ld_graph:
                     g.add_edge(n["@id"], i["@id"], "domainIncludes")
                     g.add_edge(i["@id"], n["@id"], "domainOf")      
                 except Exception as error:
-                    error_list.append({"type ": "domainIncludes missing" , "value": str(error)})
+                    error_list.append({"type ": "domainIncludes missing" , "value": str(error), "in": n["@id"]})
                     pass
                 
         if "iudx:rangeIncludes" in n :
@@ -134,7 +134,7 @@ for n in json_ld_graph:
                     g.add_edge(n["@id"], i["@id"], "rangeIncludes")
                     g.add_edge(i["@id"], n["@id"], "rangeOf")
                 except Exception as error:
-                    error_list.append({"type" : "rangeIncludes missing", "value" : str(error)})
+                    error_list.append({"type" : "rangeIncludes missing", "value" : str(error), "in": n["@id"]})
                     pass
 
 n = g.get_vertex("iudx:Resource")
