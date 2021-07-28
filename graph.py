@@ -32,7 +32,7 @@ class Vertex:
         self.id = node
         self.node_type = vertice_type
         self.adjacent = {}
-        self.jsonlist = list(jsonld)
+        self.jsonld = jsonld
 
     def __str__(self) -> str:
         print(str(self.id))
@@ -75,10 +75,10 @@ class Graph:
     def get_class_graph(self, v, out = []):
         for key, value in v.adjacent.items():
             if value == "domainOf":
-                out.append(key.id)
+                out.append(key.jsonld)
             elif value == "subClassOf":
-                out.append(key.id)
-                self.get_class_graph(key)
+                out.append(key.jsonld)
+                self.get_class_graph(key,out)
 
     def get_vertex(self, search):
         if search in self.vertices:
