@@ -5,28 +5,13 @@ import json
 
 
 path_to_json ='./repos/iudx-voc/'
-json_ld_graph = []
-classes = ['owl:Class', 'rdfs:Class']
-properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "rdf:Property"] 
+classes = ['owl:Class', 'rdfs:Class', 'rdf:Property']
+properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "iudx:Relationship"] 
 relation = ["iudx:Relationship"]
-list_out = []
+
 error_list = []
-for subdir, dirs, files in os.walk(path_to_json):
-    for file in files:
-        #print os.path.join(subdir, file)
-        filepath = subdir + os.sep + file
 
-        if filepath.endswith(".jsonld"):
-            # print (filepath)
-            with open(filepath,"r+") as input_file:
-                data = json.load(input_file)
-                if "@graph" in data:
-                    json_ld_graph.append((data["@graph"][0])) 
                     
-
-                
-                
-
 
 class Vertex:
     def __init__(self, node, vertice_type, jsonld) -> None:
@@ -61,7 +46,7 @@ class Graph:
         self.vertices = {}
         self.num_of_vertices = 0
         
-    def __iter__(self) ->None:
+    def __iter__(self) -> None:
         return(iter(self.vertices.values()))
 
     def add_vertex(self, node, tp, jsonld):
@@ -73,16 +58,16 @@ class Graph:
     def add_edge(self,vertex_from, vertex_to, relationship): 
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to], relationship)
         
-    def get_class_graph(self, v, out = []):
+    def get_class_graph(self, v, out=[]):
         for key, value in v.adjacent.items():
             if value == "domainOf":
                 out.append(key.jsonld)
             elif value == "subClassOf":
                 out.append(key.jsonld)
-                self.get_class_graph(key,out)
+                self.get_class_graph(key, out)
             elif value == "rangeOf":
                 out.append(key.jsonld)
-                self.get_class_graph(key,out)
+                self.get_class_graph(key, out)
 
     def get_vertex(self, search):
         if search in self.vertices:
@@ -95,50 +80,76 @@ class Graph:
 
 
 
-g = Graph()
+class Vocabulary:
+    
+    def __init__(self, path_to_json):
+        self.json_ld_graph = []
+        self.read_repo(path_to_json)
+        self.g = Graph()
+        self.build_graph()
 
-for n in json_ld_graph:
-    try:
-        # Making vertices of all classes  
-        if (any(ele in classes for ele in n["@type"])):
-            tp = "Class"
-            g.add_vertex(n["@id"], tp, n)
-        # Making vertices of all properties
-        if (any(ele in properties for ele in n["@type"])):
-            tp = "Property"
-            g.add_vertex(n["@id"], tp, n)
-    except:
-        pass     
+    def read_repo(self, path_to_json):
+        for subdir, dirs, files in os.walk(path_to_json):
+            for file in files:
+                filepath = subdir + os.sep + file
+                if filepath.endswith(".jsonld"):
+                    with open(filepath,"r+") as input_file:
+                        data = json.load(input_file)
+                        if "@graph" in data:
+                            self.json_ld_graph.append((data["@graph"][0])) 
 
-for n in json_ld_graph:
-        if "rdfs:subClassOf" in n:
+    def build_graph(self):
+        for n in self.json_ld_graph:
             try:
-                g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
-            except Exception as error:
-                error_list.append({"type ": "subClassOf missing" , "value" : str(error), "in": n["@id"]})
-                pass
-                
-             
-        if "iudx:domainIncludes" in n :
-            for i in n["iudx:domainIncludes"]:
-                try:
-                    g.add_edge(n["@id"], i["@id"], "domainIncludes")
-                    g.add_edge(i["@id"], n["@id"], "domainOf")      
-                except Exception as error:
-                    error_list.append({"type ": "domainIncludes missing" , "value": str(error), "in": n["@id"]})
-                    pass
-                
-        if "iudx:rangeIncludes" in n :
-            for i in n["iudx:rangeIncludes"]:
-                try:
-                    g.add_edge(n["@id"], i["@id"], "rangeIncludes")
-                    g.add_edge(i["@id"], n["@id"], "rangeOf")
-                except Exception as error:
-                    error_list.append({"type" : "rangeIncludes missing", "value" : str(error), "in": n["@id"]})
-                    pass
+                # Making vertices of all classes  
+                if (any(ele in classes for ele in n["@type"])):
+                    tp = "Class"
+                    self.g.add_vertex(n["@id"], tp, n)
 
-n = g.get_vertex("iudx:Resource")
-g.get_class_graph(n,list_out)
-# print(list_out)
-with open("out.json", "w") as out_file:
-    json.dump(error_list, out_file)
+                # Making vertices of all properties
+                if (any(ele in properties for ele in n["@type"])):
+                    tp = "Property"
+                    self.g.add_vertex(n["@id"], tp, n)
+            except:
+                pass     
+
+        for n in self.json_ld_graph:
+                if "rdfs:subClassOf" in n:
+                    try:
+                        self.g.add_edge(n["@id"], n["rdfs:subClassOf"]["@id"], "subClassOf")
+                    except Exception as error:
+                        error_list.append({"type ": "subClassOf missing" , "in": n["@id"]})
+                        pass
+                        
+                if "iudx:domainIncludes" in n :
+                    for i in n["iudx:domainIncludes"]:
+                        try:
+                            self.g.add_edge(n["@id"], i["@id"], "domainIncludes")
+                            self.g.add_edge(i["@id"], n["@id"], "domainOf")      
+                        except Exception as error:
+                            error_list.append({"type ": "domainIncludes missing" , "value": i["@id"], "in": n["@id"]})
+                            pass
+                        
+                if "iudx:rangeIncludes" in n :
+                    for i in n["iudx:rangeIncludes"]:
+                        try:
+                            self.g.add_edge(n["@id"], i["@id"], "rangeIncludes")
+                            self.g.add_edge(i["@id"], n["@id"], "rangeOf")
+                        except Exception as error:
+                            error_list.append({"type" : "rangeIncludes missing", "value" : i["@id"], "in": n["@id"]})
+                            pass
+
+        with open("errors.json", "w") as out_file:
+            json.dump(error_list, out_file)
+
+
+def main():
+    voc = Vocabulary("./repos/iudx-voc")
+    n = voc.g.get_vertex("iudx:Resource")
+    grph = []
+    voc.g.get_class_graph(n, grph)
+
+
+
+if __name__ == "__main__":
+    main()
