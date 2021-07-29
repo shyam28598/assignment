@@ -64,14 +64,14 @@ class Graph:
         for key, value in v.adjacent.items():
             if value == "domainOf":
                 out["@graph"].append(key.jsonld)
-                out["@context"]=(key.context)
+                out["@context"].update(key.context)
             elif value == "subClassOf":
                 out["@graph"].append(key.jsonld)
-                # out["@context"]=(key.context)
+                out["@context"].update(key.context)
                 self.get_class_graph(key, out)
             elif value == "rangeOf":
                 out["@graph"].append(key.jsonld)
-                # out["@context"]=(key.context)
+                out["@context"].update(key.context)
                 self.get_class_graph(key, out)
             
 
@@ -160,6 +160,6 @@ def main():
     grph = {"@graph":[],"@context":{}}
     voc.g.get_class_graph(n, grph)
     with open("context.json", "w") as context_file:
-        json.dump( grph,context_file)
+        json.dump(grph,context_file)
 if __name__ == "__main__":
     main()
