@@ -14,12 +14,12 @@ error_list = []
                     
 
 class Vertex:
-    def __init__(self, node, vertice_type, jsonld) -> None:
+    def __init__(self, node, vertice_type, jsonld, context) -> None:
         self.id = node
         self.node_type = vertice_type
         self.adjacent = {}
         self.jsonld = jsonld
-        # self.context = context 
+        self.context = context
 
     def __str__(self) -> str:
         print(str(self.id))
@@ -50,25 +50,31 @@ class Graph:
     def __iter__(self) -> None:
         return(iter(self.vertices.values()))
 
-    def add_vertex(self, node, tp, jsonld):
+    def add_vertex(self, node, tp, jsonld, context):
         self.num_of_vertices = self.num_of_vertices + 1
-        new_vertex = Vertex(node, tp, jsonld)
+        new_vertex = Vertex(node, tp, jsonld, context)
         self.vertices[node] = new_vertex
         return new_vertex
 
     def add_edge(self,vertex_from, vertex_to, relationship): 
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to], relationship)
         
-    def get_class_graph(self, v, out=[]):
+    def get_class_graph(self, v, out = [],cont = {}):
         for key, value in v.adjacent.items():
             if value == "domainOf":
                 out.append(key.jsonld)
+                cont["@context"] = key.context
             elif value == "subClassOf":
                 out.append(key.jsonld)
+                cont["@context"] = key.context
                 self.get_class_graph(key, out)
             elif value == "rangeOf":
                 out.append(key.jsonld)
+                cont["@context"] = key.context
                 self.get_class_graph(key, out)
+            with open("context.json", "w") as context_file:
+                json.dump(out, context_file)
+                json.dump(cont, context_file)
 
     def get_vertex(self, search):
         if search in self.vertices:
@@ -97,13 +103,12 @@ class Vocabulary:
                 if filepath.endswith(".jsonld"):
                     with open(filepath,"r+") as input_file:
                         data = json.load(input_file)
-                    with open("context.json", "w") as context_file:
                         if "@graph" in data:
                             self.json_ld_graph.append((data["@graph"][0])) 
                         if "@context" in data:
-                            for i in self.json_ld_graph:
-                                self.context["@context"]=data["@context"]
-                                json.dump(self.context, context_file)
+                            self.context["@context"] = data["@context"]
+                        
+                             
                                 
                                     
 
@@ -113,12 +118,12 @@ class Vocabulary:
                 # Making vertices of all classes  
                 if (any(ele in classes for ele in n["@type"])):
                     tp = "Class"
-                    self.g.add_vertex(n["@id"], tp, n)
+                    self.g.add_vertex(n["@id"], tp, n, self.context["@context"])
 
                 # Making vertices of all properties
                 if (any(ele in properties for ele in n["@type"])):
                     tp = "Property"
-                    self.g.add_vertex(n["@id"], tp, n)
+                    self.g.add_vertex(n["@id"], tp, n, self.context["@context"])
             except:
                 pass     
 
@@ -156,7 +161,8 @@ def main():
     voc = Vocabulary("./repos/iudx-voc")
     n = voc.g.get_vertex("iudx:Resource")
     grph = []
-    voc.g.get_class_graph(n, grph)
+    con = {}
+    voc.g.get_class_graph(n, grph, con)
 
 
 
