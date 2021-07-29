@@ -19,6 +19,7 @@ class Vertex:
         self.node_type = vertice_type
         self.adjacent = {}
         self.jsonld = jsonld
+        # self.context = context 
 
     def __str__(self) -> str:
         print(str(self.id))
@@ -84,6 +85,7 @@ class Vocabulary:
     
     def __init__(self, path_to_json):
         self.json_ld_graph = []
+        self.context = {}
         self.read_repo(path_to_json)
         self.g = Graph()
         self.build_graph()
@@ -95,8 +97,16 @@ class Vocabulary:
                 if filepath.endswith(".jsonld"):
                     with open(filepath,"r+") as input_file:
                         data = json.load(input_file)
+                    with open("context.json", "w+") as context_file:
                         if "@graph" in data:
                             self.json_ld_graph.append((data["@graph"][0])) 
+                        if "@context" in data:
+                            for i in self.json_ld_graph:
+                                x=data["@context"]
+                                self.context["@graph"]=x
+                                json.dump(self.context, context_file)
+                                
+                                    
 
     def build_graph(self):
         for n in self.json_ld_graph:
