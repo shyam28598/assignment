@@ -97,13 +97,12 @@ class Vocabulary:
                 if filepath.endswith(".jsonld"):
                     with open(filepath,"r+") as input_file:
                         data = json.load(input_file)
-                    with open("context.json", "w+") as context_file:
+                    with open("context.json", "w") as context_file:
                         if "@graph" in data:
                             self.json_ld_graph.append((data["@graph"][0])) 
                         if "@context" in data:
                             for i in self.json_ld_graph:
-                                x=data["@context"]
-                                self.context["@graph"]=x
+                                self.context["@context"]=data["@context"]
                                 json.dump(self.context, context_file)
                                 
                                     
