@@ -9,10 +9,12 @@ path_to_json ='./repos/iudx-voc/'
 classes = ['owl:Class', 'rdfs:Class']
 properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "iudx:Relationship", 'rdf:Property'] 
 relation = ["iudx:Relationship"]
-folder_path = "./Class Files/"
-os.mkdir(folder_path)
-class_list = []
+class_folder_path = "./all_classes/"
+properties_folder_path = "./all_properties/"
+os.mkdir(class_folder_path)
+os.mkdir(properties_folder_path)
 error_list = []
+
 
                     
 
@@ -80,21 +82,7 @@ class Graph:
         out["@graph"].append(v.jsonld)
         out["@context"].update(v.context)
         self.get_children(v,out)
-
-    def make_file(self):
-        voc = Vocabulary("./repos/iudx-voc")
-        for n in voc.g:
-            if n.node_type == "Class":
-                k = voc.g.get_vertex(n.id)
-                grph = {"@graph":[],"@context":{}}
-                voc.g.get_class_graph(k, grph)
-                name_list = k.id.split(":")
-                with open(folder_path + name_list[1] + ".json", "w") as context_file:
-                    json.dump(grph,context_file, indent=4)
-            
-            
-        
-
+    
     def get_vertex(self, search):
         if search in self.vertices:
             return(self.vertices[search])
@@ -134,7 +122,6 @@ class Vocabulary:
                 if (any(ele in classes for ele in n["@graph"]["@type"])):
                     tp = "Class"
                     self.g.add_vertex(n["@graph"]["@id"], tp, n["@graph"], n["@context"])
-                    class_list.append(n["@graph"]["@id"])
                 # Making vertices of all properties
                 if (any(ele in properties for ele in n["@graph"]["@type"])):
                     tp = "Property"
@@ -167,7 +154,29 @@ class Vocabulary:
                         except Exception as error:
                             error_list.append({"type" : "rangeIncludes missing", "value" : i["@id"], "in": n["@graph"]["@id"]})
                             pass
-
+    def make_classfile(self):
+        for n in self.g:
+            if n.node_type == "Class":
+                k = self.g.get_vertex(n.id)
+                grph = {"@graph":[],"@context":{}}
+                self.g.get_class_graph(k, grph)
+                name_list = k.id.split(":")
+                with open(class_folder_path + name_list[1] + ".json", "w") as context_file:
+                    json.dump(grph,context_file, indent=4)
+    
+    def make_propertiesfile(self):
+        for n in self.g:
+            if n.node_type == "Property":
+                k = self.g.get_vertex(n.id)
+                grph = {"@graph":[],"@context":{}}
+                grph["@graph"].append(n.jsonld)
+                grph["@context"].update(n.context)
+                name_list = n.id.split(":")
+                with open(properties_folder_path + name_list[1] + ".json", "w") as context_file:
+                    json.dump(grph,context_file, indent=4)
+        
+        
+        
         with open("errors.json", "w") as out_file:
             json.dump(error_list, out_file)
 
@@ -177,7 +186,8 @@ def main():
     # n = voc.g.get_vertex("iudx:Resource")
     # grph = {"@graph":[],"@context":{}}
     # voc.g.get_class_graph(n, grph)
-    voc.g.make_file()
+    voc.make_classfile()
+    voc.make_propertiesfile()
     
 
 if __name__ == "__main__":
