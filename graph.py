@@ -9,7 +9,9 @@ path_to_json ='./repos/iudx-voc/'
 classes = ['owl:Class', 'rdfs:Class', 'rdf:Property']
 properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "iudx:Relationship"] 
 relation = ["iudx:Relationship"]
-
+folder_path = "./Class Files/"
+os.mkdir(folder_path)
+class_list = []
 error_list = []
 
                     
@@ -79,7 +81,15 @@ class Graph:
         out["@context"].update(v.context)
         self.get_children(v,out)
 
-
+    def make_file(self):
+        for i in class_list:
+            n = self.get_vertex(i)
+            grph = {"@graph":[],"@context":{}}
+            self.get_class_graph(n, grph)
+            name_list = i.split(":")
+            with open(folder_path + name_list[1] + ".json", "w") as context_file:
+                json.dump(grph,context_file)
+        
 
     def get_vertex(self, search):
         if search in self.vertices:
@@ -111,7 +121,6 @@ class Vocabulary:
                         if "@graph" in data:
                             self.json_ld_graph.append({"@graph":data["@graph"][0],"@context":data["@context"]})
                             
-                                
                                     
 
     def build_graph(self):
@@ -121,7 +130,7 @@ class Vocabulary:
                 if (any(ele in classes for ele in n["@graph"]["@type"])):
                     tp = "Class"
                     self.g.add_vertex(n["@graph"]["@id"], tp, n["@graph"], n["@context"])
-
+                    class_list.append(n["@graph"]["@id"])
                 # Making vertices of all properties
                 if (any(ele in properties for ele in n["@graph"]["@type"])):
                     tp = "Property"
@@ -161,11 +170,11 @@ class Vocabulary:
 
 def main():
     voc = Vocabulary("./repos/iudx-voc")
-    n = voc.g.get_vertex("iudx:Resource")
-    grph = {"@graph":[],"@context":{}}
-    voc.g.get_class_graph(n, grph)
-    with open("context.json", "w") as context_file:
-        json.dump(grph,context_file)
+    # n = voc.g.get_vertex("iudx:Resource")
+    # grph = {"@graph":[],"@context":{}}
+    # voc.g.get_class_graph(n, grph)
+    voc.g.make_file()
+    
 
 if __name__ == "__main__":
     main()
