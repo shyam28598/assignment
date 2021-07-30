@@ -60,7 +60,7 @@ class Graph:
     def add_edge(self,vertex_from, vertex_to, relationship): 
         self.vertices[vertex_from].add_neighbour(self.vertices[vertex_to], relationship)
         
-    def get_class_graph(self, v, out = {"@graph":[],"@context":{}}):
+    def get_children(self, v, out = {"@graph":[],"@context":{}}):
         for key, value in v.adjacent.items():
             if value == "domainOf":
                 out["@graph"].append(key.jsonld)
@@ -73,7 +73,13 @@ class Graph:
                 out["@graph"].append(key.jsonld)
                 out["@context"].update(key.context)
                 self.get_class_graph(key, out)
-            
+
+    def get_class_graph (self, v, out = {"@graph":[],"@context":{}}):
+        out["@graph"].append(v.jsonld)
+        out["@context"].update(v.context)
+        self.get_children(v,out)
+
+
 
     def get_vertex(self, search):
         if search in self.vertices:
@@ -105,7 +111,6 @@ class Vocabulary:
                         if "@graph" in data:
                             self.json_ld_graph.append({"@graph":data["@graph"][0],"@context":data["@context"]})
                             
-                             
                                 
                                     
 
@@ -161,5 +166,6 @@ def main():
     voc.g.get_class_graph(n, grph)
     with open("context.json", "w") as context_file:
         json.dump(grph,context_file)
+
 if __name__ == "__main__":
     main()
