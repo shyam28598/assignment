@@ -6,8 +6,8 @@ import json
 
 
 path_to_json ='./repos/iudx-voc/'
-classes = ['owl:Class', 'rdfs:Class', 'rdf:Property']
-properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "iudx:Relationship"] 
+classes = ['owl:Class', 'rdfs:Class']
+properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "iudx:Relationship", 'rdf:Property'] 
 relation = ["iudx:Relationship"]
 folder_path = "./Class Files/"
 os.mkdir(folder_path)
@@ -82,13 +82,17 @@ class Graph:
         self.get_children(v,out)
 
     def make_file(self):
-        for i in class_list:
-            n = self.get_vertex(i)
-            grph = {"@graph":[],"@context":{}}
-            self.get_class_graph(n, grph)
-            name_list = i.split(":")
-            with open(folder_path + name_list[1] + ".json", "w") as context_file:
-                json.dump(grph,context_file)
+        voc = Vocabulary("./repos/iudx-voc")
+        for n in voc.g:
+            if n.node_type == "Class":
+                k = voc.g.get_vertex(n.id)
+                grph = {"@graph":[],"@context":{}}
+                voc.g.get_class_graph(k, grph)
+                name_list = k.id.split(":")
+                with open(folder_path + name_list[1] + ".json", "w") as context_file:
+                    json.dump(grph,context_file, indent=4)
+            
+            
         
 
     def get_vertex(self, search):
