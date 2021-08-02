@@ -167,14 +167,16 @@ class Vocabulary:
                     # json.dump(grph,context_file, indent=4)
     def is_loop_util(self, v, visited={}, parent=str):
         visited[v.id] = True
-        for key,value in v.adjacent.items():
-            print(key.id)
+        print(v.id)
+        for key, value in v.adjacent.items():
+            print(key.id, value)
             if visited[key.id] == False:
                 if(self.is_loop_util(key, visited, v.id)):
                     return True
             elif parent!=key.id:
                 return True
         return False
+
 
     def make_propertiesfile(self):
         for n in self.g:
@@ -197,9 +199,9 @@ def main():
     # voc.g.get_class_graph(n, grph)
     voc.make_classfile()
     voc.make_propertiesfile()
-    parent = str
+    parent = "iudx:Resource"
     visited = voc.visited
-    if voc.is_loop_util(voc.g.get_vertex("iudx:Resource"), visited, parent):
+    if voc.is_loop_util(voc.g.get_vertex("iudx:Resource"), visited, parent) == True:
         print("Graph contains cycle")
     else:
         print("Graph does not contain cycle")
