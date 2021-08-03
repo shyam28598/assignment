@@ -13,7 +13,7 @@ class_folder_path = "./all_classes/"
 properties_folder_path = "./all_properties/"
 os.mkdir(class_folder_path)
 os.mkdir(properties_folder_path)
-value_list = ["domainOf", "subClassOf", "rangeOf"]
+relation_list = ["domainOf", "subClassOf", "rangeOf"]
 error_list = []
 
 
@@ -170,15 +170,15 @@ class Vocabulary:
                     json.dump(grph,context_file, indent=4)
 
 
-    def is_loop(self, v, visited={}, parent=str):
+    def is_loop(self, v, visited={}, root=str):
         visited[v.id] = True
         for key, value in v.adjacent.items():
-            if value in value_list:
+            if value in relation_list:
                 print(key.id, value)
                 if visited[key.id] == False:
                     if(self.is_loop(key, visited, v.id)):
                         return True
-                elif parent!=key.id:
+                elif root!=key.id:
                     return True
         return False
 
@@ -196,15 +196,15 @@ class Vocabulary:
         with open("errors.json", "w") as out_file:
             json.dump(error_list, out_file)
 
-voc = Vocabulary("./repos/iudx-voc")
+
 def main():
     voc = Vocabulary("./repos/iudx-voc")
     voc.make_classfile()
     voc.make_propertiesfile()
-    parent = "iudx:Resource"
+    root = "iudx:Resource"
     visited = voc.visited
     
-    if voc.is_loop(voc.g.get_vertex("iudx:Resource"), visited, parent) == True:
+    if voc.is_loop(voc.g.get_vertex("iudx:Resource"), visited, root) == True:
         print("Graph contains cycle")
     else:
         print("Graph does not contain cycle")
