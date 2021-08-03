@@ -9,10 +9,10 @@ path_to_json ='./repos/iudx-voc/'
 classes = ['owl:Class', 'rdfs:Class']
 properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:StructuredProperty", "iudx:GeoProperty", "iudx:TimeProperty", "iudx:Relationship", 'rdf:Property'] 
 relation = ["iudx:Relationship"]
-# class_folder_path = "./all_classes/"
-# properties_folder_path = "./all_properties/"
-# os.mkdir(class_folder_path)
-# os.mkdir(properties_folder_path)
+class_folder_path = "./all_classes/"
+properties_folder_path = "./all_properties/"
+os.mkdir(class_folder_path)
+os.mkdir(properties_folder_path)
 error_list = []
 
 
@@ -72,11 +72,10 @@ class Graph:
             elif value == "subClassOf":
                 out["@graph"].append(key.jsonld)
                 out["@context"].update(key.context)
-                self.get_class_graph(key, out)
             elif value == "rangeOf":
                 out["@graph"].append(key.jsonld)
                 out["@context"].update(key.context)
-                self.get_class_graph(key, out)
+                self.get_children(key, out)
     def get_class_graph (self, v, out = {"@graph":[],"@context":{}}):
         out["@graph"].append(v.jsonld)
         out["@context"].update(v.context)
@@ -162,14 +161,14 @@ class Vocabulary:
                 k = self.g.get_vertex(n.id)
                 grph = {"@graph":[],"@context":{}}
                 self.g.get_class_graph(k, grph)
-                # name_list = k.id.split(":")
-                # with open(class_folder_path + name_list[1] + ".json", "w") as context_file:
-                    # json.dump(grph,context_file, indent=4)
+                name_list = k.id.split(":")
+                with open(class_folder_path + name_list[1] + ".json", "w") as context_file:
+                    json.dump(grph,context_file, indent=4)
+
+
     def is_loop_util(self, v, visited={}, parent=str):
         visited[v.id] = True
-        print(v.id)
         for key, value in v.adjacent.items():
-            print(key.id, value)
             if visited[key.id] == False:
                 if(self.is_loop_util(key, visited, v.id)):
                     return True
@@ -185,8 +184,8 @@ class Vocabulary:
                 grph["@graph"].append(n.jsonld)
                 grph["@context"].update(n.context)
                 name_list = n.id.split(":")
-                # with open(properties_folder_path + name_list[1] + ".json", "w") as context_file:
-                    # json.dump(grph,context_file, indent=4)
+                with open(properties_folder_path + name_list[1] + ".json", "w") as context_file:
+                    json.dump(grph,context_file, indent=4)
         
         with open("errors.json", "w") as out_file:
             json.dump(error_list, out_file)
