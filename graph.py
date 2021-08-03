@@ -11,10 +11,10 @@ properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:Structured
 relation = ["iudx:Relationship"]
 class_folder_path = "./all_classes/"
 properties_folder_path = "./all_properties/"
-# os.mkdir(class_folder_path)
-# os.mkdir(properties_folder_path)
-error_list = []
+os.mkdir(class_folder_path)
+os.mkdir(properties_folder_path)
 value_list = ["domainOf", "subClassOf", "rangeOf"]
+error_list = []
 
 
                     
@@ -78,6 +78,7 @@ class Graph:
                 out["@graph"].append(key.jsonld)
                 out["@context"].update(key.context)
                 self.get_children(key, out)
+    
     def get_class_graph (self, v, out = {"@graph":[],"@context":{}}):
         out["@graph"].append(v.jsonld)
         out["@context"].update(v.context)
@@ -169,13 +170,13 @@ class Vocabulary:
                     json.dump(grph,context_file, indent=4)
 
 
-    def is_loop_util(self, v, visited={}, parent=str):
+    def is_loop(self, v, visited={}, parent=str):
         visited[v.id] = True
         for key, value in v.adjacent.items():
             if value in value_list:
                 print(key.id, value)
                 if visited[key.id] == False:
-                    if(self.is_loop_util(key, visited, v.id)):
+                    if(self.is_loop(key, visited, v.id)):
                         return True
                 elif parent!=key.id:
                     return True
@@ -198,14 +199,12 @@ class Vocabulary:
 voc = Vocabulary("./repos/iudx-voc")
 def main():
     voc = Vocabulary("./repos/iudx-voc")
-    # n = voc.g.get_vertex("iudx:Resource")
-    # grph = {"@graph":[],"@context":{}}
-    # voc.g.get_class_graph(n, grph)
     voc.make_classfile()
     voc.make_propertiesfile()
     parent = "iudx:Resource"
     visited = voc.visited
-    if voc.is_loop_util(voc.g.get_vertex("iudx:IUDXEntity"), visited, parent):
+    
+    if voc.is_loop(voc.g.get_vertex("iudx:Resource"), visited, parent) == True:
         print("Graph contains cycle")
     else:
         print("Graph does not contain cycle")
