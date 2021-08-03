@@ -11,9 +11,10 @@ properties = ["iudx:TextProperty", "iudx:QuantitativeProperty", "iudx:Structured
 relation = ["iudx:Relationship"]
 class_folder_path = "./all_classes/"
 properties_folder_path = "./all_properties/"
-os.mkdir(class_folder_path)
-os.mkdir(properties_folder_path)
+# os.mkdir(class_folder_path)
+# os.mkdir(properties_folder_path)
 error_list = []
+value_list = ["domainOf", "subClassOf", "rangeOf"]
 
 
                     
@@ -72,6 +73,7 @@ class Graph:
             elif value == "subClassOf":
                 out["@graph"].append(key.jsonld)
                 out["@context"].update(key.context)
+                # self.get_children(key, out)
             elif value == "rangeOf":
                 out["@graph"].append(key.jsonld)
                 out["@context"].update(key.context)
@@ -155,6 +157,7 @@ class Vocabulary:
                         except Exception as error:
                             error_list.append({"type" : "rangeIncludes missing", "value" : i["@id"], "in": n["@graph"]["@id"]})
                             pass
+    
     def make_classfile(self):
         for n in self.g:
             if n.node_type == "Class":
@@ -169,11 +172,13 @@ class Vocabulary:
     def is_loop_util(self, v, visited={}, parent=str):
         visited[v.id] = True
         for key, value in v.adjacent.items():
-            if visited[key.id] == False:
-                if(self.is_loop_util(key, visited, v.id)):
+            if value in value_list:
+                print(key.id, value)
+                if visited[key.id] == False:
+                    if(self.is_loop_util(key, visited, v.id)):
+                        return True
+                elif parent!=key.id:
                     return True
-            elif parent!=key.id:
-                return True
         return False
 
 
@@ -200,7 +205,7 @@ def main():
     voc.make_propertiesfile()
     parent = "iudx:Resource"
     visited = voc.visited
-    if voc.is_loop_util(voc.g.get_vertex("iudx:Resource"), visited, parent) == True:
+    if voc.is_loop_util(voc.g.get_vertex("iudx:IUDXEntity"), visited, parent):
         print("Graph contains cycle")
     else:
         print("Graph does not contain cycle")
